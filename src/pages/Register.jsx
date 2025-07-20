@@ -4,24 +4,17 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [form, setForm] = useState({
-    name: '',
+    fullName: '',
     email: '',
-    phone: '',
-    district: '',
     password: '',
     confirmPassword: '',
-    role: 'police',
+    role: 'admin',
   });
+
   const [image, setImage] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const districts = [
-    "Abdiaziz", "Bondhere", "Daynile", "Dharkenley", "Hamar Jajab",
-    "Hamar Weyne", "Hodan", "Howlwadaag", "Kahda", "Karaan",
-    "Shangani", "Shibis", "Waberi", "Wadajir", "Warta Nabadda", "Yaqshid"
-  ];
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,10 +23,8 @@ const Register = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!form.name) newErrors.name = 'Full Name is required';
+    if (!form.fullName) newErrors.fullName = 'Full Name is required';
     if (!form.email) newErrors.email = 'Email is required';
-    if (!form.phone) newErrors.phone = 'Phone number is required';
-    if (!form.district) newErrors.district = 'District is required';
     if (!form.password) newErrors.password = 'Password is required';
     if (!form.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
     if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
@@ -55,7 +46,7 @@ const Register = () => {
     if (image) formData.append('image', image);
 
     try {
-      await axios.post('https://security991.onrender.com/api/users/register', formData);
+      await axios.post('http://localhost:5000/api/users/register', formData);
       setLoading(false);
       navigate('/login');
     } catch (err) {
@@ -65,10 +56,10 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-violet-600 dark:text-violet-400 mb-6">
-          👮 Police Register
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-gray-900 dark:to-gray-800 px-4 py-10">
+      <div className="w-full max-w-xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-10">
+        <h2 className="text-3xl font-extrabold text-center text-blue-600 dark:text-blue-400 mb-6">
+          🩺 Healthcare Registration
         </h2>
 
         {errors.general && (
@@ -81,13 +72,13 @@ const Register = () => {
           <div>
             <input
               type="text"
-              name="name"
+              name="fullName"
               placeholder="Full Name"
-              className="input-field w-full"
-              value={form.name}
+              className=" mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 w-full"
+              value={form.fullName}
               onChange={handleChange}
             />
-            {errors.name && <label className="text-red-500 text-sm">{errors.name}</label>}
+            {errors.fullName && <label className="text-red-500 text-sm">{errors.fullName}</label>}
           </div>
 
           <div>
@@ -95,7 +86,7 @@ const Register = () => {
               type="email"
               name="email"
               placeholder="Email Address"
-              className="input-field w-full"
+              className=" mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 w-full"
               value={form.email}
               onChange={handleChange}
             />
@@ -104,39 +95,10 @@ const Register = () => {
 
           <div>
             <input
-              type="text"
-              name="phone"
-              placeholder="Phone Number"
-              className="input-field w-full"
-              value={form.phone}
-              onChange={handleChange}
-            />
-            {errors.phone && <label className="text-red-500 text-sm">{errors.phone}</label>}
-          </div>
-
-          <div>
-            <select
-              name="district"
-              className="input-field w-full"
-              value={form.district}
-              onChange={handleChange}
-            >
-              <option value="">Select District</option>
-              {districts.map((district) => (
-                <option key={district} value={district}>
-                  {district}
-                </option>
-              ))}
-            </select>
-            {errors.district && <label className="text-red-500 text-sm">{errors.district}</label>}
-          </div>
-
-          <div>
-            <input
               type="password"
               name="password"
               placeholder="Password"
-              className="input-field w-full"
+              className=" mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 w-full"
               value={form.password}
               onChange={handleChange}
             />
@@ -148,7 +110,7 @@ const Register = () => {
               type="password"
               name="confirmPassword"
               placeholder="Confirm Password"
-              className="input-field w-full"
+              className=" mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 w-full"
               value={form.confirmPassword}
               onChange={handleChange}
             />
@@ -158,17 +120,20 @@ const Register = () => {
           </div>
 
           <div>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+              Profile Picture
+            </label>
             <input
               type="file"
               name="image"
               onChange={(e) => setImage(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow transition duration-300"
             disabled={loading}
           >
             {loading ? 'Registering...' : 'Register'}
@@ -176,8 +141,8 @@ const Register = () => {
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
-          Already have an account?{' '}
-          <Link to="/login" className="text-violet-600 hover:underline">
+          Already registered?{' '}
+          <Link to="/login" className="text-blue-600 hover:underline">
             Login
           </Link>
         </p>

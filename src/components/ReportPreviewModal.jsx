@@ -22,7 +22,7 @@ const ReportPreviewModal = ({ report, onClose }) => {
             {report.images?.map((img, i) => (
               <img
                 key={i}
-                src={`https://security991.onrender.com/uploads/report/${img}`}
+                src={`http://localhost:5000/uploads/report/${img}`}
                 alt={`report-${i}`}
                 className="w-full h-32 object-cover rounded border"
               />
