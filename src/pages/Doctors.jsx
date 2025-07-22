@@ -3,7 +3,6 @@ import axios from 'axios';
 import Modal from 'react-modal';
 import Skeleton from 'react-loading-skeleton';
 import Swal from 'sweetalert2';
-
 import { FaEdit, FaEye, FaTrash, FaUserMd } from 'react-icons/fa';
 
 Modal.setAppElement('#root');
@@ -46,7 +45,7 @@ const Doctors = () => {
         status: doctor.status,
         image: doctor.image,
       });
-      setImagePreview(doctor.image);
+      setImagePreview(`http://localhost:5000/uploads/${doctor.image}`);
     } else {
       setEditId(null);
       setForm({ name: '', email: '', phone: '', specialization: '', experience: '', status: '', image: '' });
@@ -58,8 +57,10 @@ const Doctors = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setForm({ ...form, image: file });
-    setImagePreview(URL.createObjectURL(file));
+    if (file) {
+      setForm({ ...form, image: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const validate = () => {
@@ -67,10 +68,12 @@ const Doctors = () => {
     if (!form.name) newErrors.name = 'Full name is required';
     if (!form.email) newErrors.email = 'Email is required';
     if (!form.phone) newErrors.phone = 'Phone number is required';
+    else if (!/^061\d{7}$/.test(form.phone)) newErrors.phone = 'Phone must start with 061 and be 10 digits';
     if (!form.specialization) newErrors.specialization = 'Specialization is required';
     if (!form.experience) newErrors.experience = 'Experience is required';
+    else if (!/^\d+$/.test(form.experience)) newErrors.experience = 'Experience must be a number';
     if (!form.status) newErrors.status = 'Status is required';
-    if (!form.image && !editId) newErrors.image = 'Image is required';
+    if ((!form.image || typeof form.image === 'string') && !editId) newErrors.image = 'Image is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,13 +84,14 @@ const Doctors = () => {
     Object.entries(form).forEach(([key, val]) => formData.append(key, val));
 
     try {
+      let res;
       if (editId) {
-        await axios.put(`http://localhost:5000/api/doctors/${editId}`, formData);
-        Swal.fire('Success', 'Doctor updated successfully', 'success');
+        res = await axios.put(`http://localhost:5000/api/doctors/${editId}`, formData);
       } else {
-        await axios.post('http://localhost:5000/api/doctors', formData);
-        Swal.fire('Success', 'Doctor registered successfully', 'success');
+        res = await axios.post('http://localhost:5000/api/doctors', formData);
       }
+
+      Swal.fire('Success', res.data?.message || 'Doctor saved successfully', 'success');
       fetchDoctors();
       setModalOpen(false);
     } catch (err) {
@@ -126,7 +130,7 @@ const Doctors = () => {
         <button onClick={() => openModal()} className="bg-blue-600 text-white px-4 py-2 rounded">+ Add Doctor</button>
       </div>
 
-      <div className="overflow-x-auto bg-white rounded-2xl ">
+      <div className="overflow-x-auto bg-white rounded-2xl">
         {loading ? (
           <Skeleton height={250} />
         ) : (
@@ -143,43 +147,23 @@ const Doctors = () => {
                 <th className="p-2">Actions</th>
               </tr>
             </thead>
-            <tbody className='rounded-2xl'>
+            <tbody>
               {doctors.map((doc) => (
                 <tr key={doc._id} className="border-t hover:bg-gray-50">
-                  <td className="p-2"><img src={`http://localhost:5000/uploads/${doc.image}`} alt="" className="w-10 h-10 rounded-full object-cover" /></td>
+                  <td className="p-2">
+                    <img src={`http://localhost:5000/uploads/${doc.image}`} alt="" className="w-10 h-10 rounded-full object-cover" />
+                  </td>
                   <td className="p-2">{doc.name}</td>
                   <td className="p-2">{doc.email}</td>
                   <td className="p-2">{doc.phone}</td>
                   <td className="p-2">{doc.specialization}</td>
                   <td className="p-2">{doc.experience}</td>
-                  <td className="p-2">{doc.status}</td>
-                 <td className="p-2 flex gap-2">
-  <button
-    onClick={() => openPreview(doc)}
-    className="bg-blue-100 text-blue-600 p-2 rounded-full hover:bg-blue-200"
-    title="Edit"
-  >
-    <FaEye size={16} />
-  </button>
-
-  <button
-    
-    onClick={() => openModal(doc)}
-    className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200"
-    title="Preview"
-  >
-   
-     <FaEdit size={16} />
-  </button>
-
-  <button
-    onClick={() => handleDelete(doc._id)}
-    className="bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200"
-    title="Delete"
-  >
-    <FaTrash size={16} />
-  </button>
-</td>
+                  <td className="p-2 capitalize">{doc.status}</td>
+                  <td className="p-2 flex gap-2">
+                    <button onClick={() => openPreview(doc)} className="bg-blue-100 text-blue-600 p-2 rounded-full hover:bg-blue-200"><FaEye size={16} /></button>
+                    <button onClick={() => openModal(doc)} className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200"><FaEdit size={16} /></button>
+                    <button onClick={() => handleDelete(doc._id)} className="bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200"><FaTrash size={16} /></button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -187,13 +171,14 @@ const Doctors = () => {
         )}
       </div>
 
+      {/* Modal Form */}
       <Modal isOpen={modalOpen} onRequestClose={() => setModalOpen(false)} className="z-50 max-w-3xl mx-auto bg-white rounded p-6 mt-10 outline-none shadow-xl">
         <h2 className="text-lg font-semibold mb-4">{editId ? 'Edit Doctor' : 'Register Doctor'}</h2>
 
         <div className="flex justify-center mb-4">
           <label htmlFor="image" className="cursor-pointer">
             {imagePreview ? (
-              <img src={`http://localhost:5000/uploads/${imagePreview}`} className="w-24 h-24 rounded-full object-cover" alt="Preview" />
+              <img src={imagePreview} className="w-24 h-24 rounded-full object-cover" alt="Preview" />
             ) : (
               <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
                 <FaUserMd size={30} />
@@ -201,10 +186,11 @@ const Doctors = () => {
             )}
             <input type="file" id="image" className="hidden" onChange={handleImageChange} />
           </label>
+          {errors.image && <p className="text-red-500 text-sm text-center mt-2">{errors.image}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          {['name', 'email', 'phone', 'specialization', 'experience', 'status'].map((field) => (
+          {['name', 'email', 'phone', 'specialization'].map((field) => (
             <div key={field}>
               <label className="block text-sm capitalize">{field}</label>
               <input
@@ -216,6 +202,33 @@ const Doctors = () => {
               {errors[field] && <p className="text-red-500 text-sm">{errors[field]}</p>}
             </div>
           ))}
+
+          {/* Experience */}
+          <div>
+            <label className="block text-sm">Experience (years)</label>
+            <input
+              type="number"
+              value={form.experience}
+              onChange={(e) => setForm({ ...form, experience: e.target.value })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.experience && <p className="text-red-500 text-sm">{errors.experience}</p>}
+          </div>
+
+          {/* Status Dropdown */}
+          <div>
+            <label className="block text-sm">Status</label>
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">-- Select Status --</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+            {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}
+          </div>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
@@ -224,6 +237,7 @@ const Doctors = () => {
         </div>
       </Modal>
 
+      {/* Preview Modal */}
       <Modal isOpen={previewOpen} onRequestClose={() => setPreviewOpen(false)} className="z-40 max-w-md mx-auto bg-white rounded p-4 mt-10 outline-none shadow-lg">
         <h2 className="text-lg font-bold mb-4">Doctor Info</h2>
         {previewDoctor && (
