@@ -13,7 +13,10 @@ const Doctors = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDoctor, setPreviewDoctor] = useState(null);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', specialization: '', experience: '', status: '', image: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', specialization: '', experience: '',
+    status: '', image: '', language: '', appointmentprice: ''
+  });
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [editId, setEditId] = useState(null);
@@ -44,11 +47,16 @@ const Doctors = () => {
         experience: doctor.experience,
         status: doctor.status,
         image: doctor.image,
+        language: doctor.language || '',
+        appointmentprice: doctor.appointmentprice || '',
       });
       setImagePreview(`http://localhost:5000/uploads/${doctor.image}`);
     } else {
       setEditId(null);
-      setForm({ name: '', email: '', phone: '', specialization: '', experience: '', status: '', image: '' });
+      setForm({
+        name: '', email: '', phone: '', specialization: '', experience: '',
+        status: '', image: '', language: '', appointmentprice: ''
+      });
       setImagePreview(null);
     }
     setErrors({});
@@ -73,6 +81,9 @@ const Doctors = () => {
     if (!form.experience) newErrors.experience = 'Experience is required';
     else if (!/^\d+$/.test(form.experience)) newErrors.experience = 'Experience must be a number';
     if (!form.status) newErrors.status = 'Status is required';
+    if (!form.language) newErrors.language = 'Language is required';
+    if (!form.appointmentprice) newErrors.appointmentprice = 'Appointment price is required';
+    else if (isNaN(form.appointmentprice)) newErrors.appointmentprice = 'Must be a number';
     if ((!form.image || typeof form.image === 'string') && !editId) newErrors.image = 'Image is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -82,7 +93,6 @@ const Doctors = () => {
     if (!validate()) return;
     const formData = new FormData();
     Object.entries(form).forEach(([key, val]) => formData.append(key, val));
-
     try {
       let res;
       if (editId) {
@@ -90,7 +100,6 @@ const Doctors = () => {
       } else {
         res = await axios.post('http://localhost:5000/api/doctors', formData);
       }
-
       Swal.fire('Success', res.data?.message || 'Doctor saved successfully', 'success');
       fetchDoctors();
       setModalOpen(false);
@@ -171,10 +180,8 @@ const Doctors = () => {
         )}
       </div>
 
-      {/* Modal Form */}
       <Modal isOpen={modalOpen} onRequestClose={() => setModalOpen(false)} className="z-50 max-w-3xl mx-auto bg-white rounded p-6 mt-10 outline-none shadow-xl">
         <h2 className="text-lg font-semibold mb-4">{editId ? 'Edit Doctor' : 'Register Doctor'}</h2>
-
         <div className="flex justify-center mb-4">
           <label htmlFor="image" className="cursor-pointer">
             {imagePreview ? (
@@ -203,7 +210,6 @@ const Doctors = () => {
             </div>
           ))}
 
-          {/* Experience */}
           <div>
             <label className="block text-sm">Experience (years)</label>
             <input
@@ -215,7 +221,6 @@ const Doctors = () => {
             {errors.experience && <p className="text-red-500 text-sm">{errors.experience}</p>}
           </div>
 
-          {/* Status Dropdown */}
           <div>
             <label className="block text-sm">Status</label>
             <select
@@ -229,6 +234,28 @@ const Doctors = () => {
             </select>
             {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}
           </div>
+
+          <div>
+            <label className="block text-sm">Language</label>
+            <input
+              type="text"
+              value={form.language}
+              onChange={(e) => setForm({ ...form, language: e.target.value })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.language && <p className="text-red-500 text-sm">{errors.language}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm">Appointment Price ($)</label>
+            <input
+              type="number"
+              value={form.appointmentprice}
+              onChange={(e) => setForm({ ...form, appointmentprice: e.target.value })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.appointmentprice && <p className="text-red-500 text-sm">{errors.appointmentprice}</p>}
+          </div>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
@@ -237,13 +264,12 @@ const Doctors = () => {
         </div>
       </Modal>
 
-      {/* Preview Modal */}
       <Modal isOpen={previewOpen} onRequestClose={() => setPreviewOpen(false)} className="z-40 max-w-md mx-auto bg-white rounded p-4 mt-10 outline-none shadow-lg">
         <h2 className="text-lg font-bold mb-4">Doctor Info</h2>
         {previewDoctor && (
           <div className="text-center">
             <img src={`http://localhost:5000/uploads/${previewDoctor.image}`} alt="" className="w-24 h-24 rounded-full mx-auto mb-4 object-cover" />
-            {['name', 'email', 'phone', 'specialization', 'experience', 'status'].map((key) => (
+            {['name', 'email', 'phone', 'specialization', 'experience', 'status', 'language', 'appointmentprice'].map((key) => (
               <p key={key}><strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {previewDoctor[key]}</p>
             ))}
           </div>

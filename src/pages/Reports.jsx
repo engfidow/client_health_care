@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
+
 import * as XLSX from 'xlsx';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { 
   FiCalendar, 
   FiFilter, 
@@ -117,20 +121,21 @@ const Reports = () => {
         a.status
       ]);
       
-      doc.autoTable({
-        startY: 55,
-        head: [['No', 'User', 'Doctor', 'Date', 'Phone', 'Price', 'Status']],
-        body: tableData,
-        headStyles: {
-          fillColor: [59, 130, 246],
-          textColor: 255,
-          fontStyle: 'bold'
-        },
-        alternateRowStyles: {
-          fillColor: [240, 240, 240]
-        },
-        margin: { top: 55 }
-      });
+     autoTable(doc, {
+  startY: 55,
+  head: [['No', 'User', 'Doctor', 'Date', 'Phone', 'Price', 'Status']],
+  body: tableData,
+  headStyles: {
+    fillColor: [59, 130, 246],
+    textColor: 255,
+    fontStyle: 'bold'
+  },
+  alternateRowStyles: {
+    fillColor: [240, 240, 240]
+  },
+  margin: { top: 55 }
+});
+
       
       doc.save(`appointments_${format(new Date(), 'yyyyMMdd')}.pdf`);
       toast.success('PDF file downloaded successfully');

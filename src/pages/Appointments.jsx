@@ -4,7 +4,9 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+
+import autoTable from 'jspdf-autotable';
+
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -69,26 +71,31 @@ const Appointments = () => {
   };
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = ["Doctor", "Patient", "Phone", "Reason", "Price", "Status", "Date"];
-    const tableRows = [];
+  const doc = new jsPDF();
+  const tableColumn = ["Doctor", "Patient", "Phone", "Reason", "Price", "Status", "Date"];
+  const tableRows = [];
 
-    filteredAppointments.forEach(a => {
-      tableRows.push([
-        a.doctorId?.name || 'N/A',
-        a.userId?.fullName || 'N/A',
-        a.phone || 'N/A',
-        a.reason || 'N/A',
-        a.appointmentprice || 'N/A',
-        a.status,
-        new Date(a.date).toLocaleString()
-      ]);
-    });
+  filteredAppointments.forEach(a => {
+    tableRows.push([
+      a.doctorId?.name || 'N/A',
+      a.userId?.fullName || 'N/A',
+      a.phone || 'N/A',
+      a.reason || 'N/A',
+      a.appointmentprice || 'N/A',
+      a.status,
+      new Date(a.date).toLocaleString()
+    ]);
+  });
 
-    doc.autoTable(tableColumn, tableRows, { startY: 20 });
-    doc.text("Appointments Report", 14, 15);
-    doc.save("appointments.pdf");
-  };
+  doc.text("Appointments Report", 14, 15);
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 20,
+  });
+  doc.save("appointments.pdf");
+};
+
 
   useEffect(() => {
     fetchAppointments();
