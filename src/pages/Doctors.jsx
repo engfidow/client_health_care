@@ -14,9 +14,10 @@ const Doctors = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDoctor, setPreviewDoctor] = useState(null);
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', specialization: '', experience: '',
-    status: '', image: '', language: '', appointmentprice: ''
-  });
+  name: '', email: '', phone: '', specialization: '', experience: '',
+  status: '', image: '', language: '', appointmentprice: '', password: ''
+});
+
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [editId, setEditId] = useState(null);
@@ -55,7 +56,7 @@ const Doctors = () => {
       setEditId(null);
       setForm({
         name: '', email: '', phone: '', specialization: '', experience: '',
-        status: '', image: '', language: '', appointmentprice: ''
+        status: '', image: '', language: '', appointmentprice: '', password: ''
       });
       setImagePreview(null);
     }
@@ -82,6 +83,9 @@ const Doctors = () => {
     else if (!/^\d+$/.test(form.experience)) newErrors.experience = 'Experience must be a number';
     if (!form.status) newErrors.status = 'Status is required';
     if (!form.language) newErrors.language = 'Language is required';
+    if (!editId && !form.password) newErrors.password = 'Password is required';
+    else if (!editId && form.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+  
     if (!form.appointmentprice) newErrors.appointmentprice = 'Appointment price is required';
     else if (isNaN(form.appointmentprice)) newErrors.appointmentprice = 'Must be a number';
     if ((!form.image || typeof form.image === 'string') && !editId) newErrors.image = 'Image is required';
@@ -256,6 +260,20 @@ const Doctors = () => {
             />
             {errors.appointmentprice && <p className="text-red-500 text-sm">{errors.appointmentprice}</p>}
           </div>
+
+          {!editId && (
+  <div>
+    <label className="block text-sm">Password</label>
+    <input
+      type="password"
+      value={form.password}
+      onChange={(e) => setForm({ ...form, password: e.target.value })}
+      className="w-full p-2 border rounded"
+    />
+    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+  </div>
+)}
+
         </div>
 
         <div className="mt-4 flex justify-end gap-2">

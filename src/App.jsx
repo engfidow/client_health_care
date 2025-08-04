@@ -15,6 +15,8 @@ import Profile from './pages/Profile';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import DoctorAppointments from './pages/DoctorAppointments';
+import DoctorDashboard from './pages/DoctorDashboard';
 
 function App() {
   const location = useLocation();
@@ -46,6 +48,8 @@ function App() {
         <Route path="doctors" element={<Doctors />} />
         <Route path="appointments" element={<Appointments />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="dotcor-appointments" element={<DoctorAppointments />} />
+        <Route path="dotcor-dashboard" element={<DoctorDashboard />} />
         <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>

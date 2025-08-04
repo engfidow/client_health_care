@@ -90,13 +90,31 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
         {/* Nav */}
         <nav className="flex-1 space-y-2">
-          {navItem('/', <FaTachometerAlt size={18} />, 'Dashboard')}
+           {role === 'admin' && (
+            <>
+             {navItem('/', <FaTachometerAlt size={18} />, 'Dashboard')}
           {navItem('/doctors', <FaUserMd size={18} />, 'Doctors')}
           
           {navItem('/appointments', <FaCalendarAlt size={18} />, 'Appointments')}
           
           {navItem('/reports', <FaFileMedicalAlt size={18} />, 'Reports')}
           {role === 'admin' && navItem('/users', <FaUsers size={18} />, 'User Management')}
+            
+            </>
+        
+         
+           )}
+
+
+            {role === 'doctor' && (
+            <>
+            {navItem('/dotcor-dashboard', <FaTachometerAlt size={18} />, 'Dashboard')}
+             {navItem('/dotcor-appointments', <FaTachometerAlt size={18} />, 'Appointments')}
+            
+            </>
+        
+         
+           )}
         </nav>
 
         {/* Bottom */}
