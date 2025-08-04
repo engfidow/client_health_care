@@ -7,7 +7,7 @@ import { FaCalendarAlt, FaClock, FaUser, FaPhone, FaMoneyBill, FaCheckCircle } f
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-   const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user'));
   
 
   const fetchAppointments = async () => {
